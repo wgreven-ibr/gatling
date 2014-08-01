@@ -11,8 +11,8 @@ import sys, os
 extensions = ['sphinx.ext.todo', 'sphinx.ext.extlinks']
 todo_include_todos = True
 extlinks = {
-	"issue" : ("https://github.com/excilys/gatling/issues/%s", "#"),
-	"version" : ("https://github.com/excilys/gatling/issues?milestone=%s&state=closed", None)
+  "issue" : ("https://github.com/gatling/gatling/issues/%s", "#"),
+  "version" : ("https://github.com/gatling/gatling/issues?milestone=%s&state=closed", None)
 }
 
 ################
@@ -21,7 +21,7 @@ extlinks = {
 
 project = u'Gatling'
 copyright = u'2013, eBusiness Information'
-version = '1.5.2'
+version = '1.5.6'
 release = version
 
 ####################
@@ -38,6 +38,8 @@ nitpicky = True
 # HTML output #
 ###############
 
+html_theme = 'gatling'
+html_theme_path = ['_sphinx/themes']
 html_title = "Gatling documentation"
 html_domain_indices = False
 html_use_index = False
