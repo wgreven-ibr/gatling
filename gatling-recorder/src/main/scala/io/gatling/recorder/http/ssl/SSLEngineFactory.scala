@@ -21,8 +21,8 @@ import javax.net.ssl.SSLEngine
 
 object SSLEngineFactory {
 
-  def newServerSSLEngine: SSLEngine = {
-    val ctx = SecureChatSslContextFactory.ServerContext.createSSLEngine
+  def newServerSSLEngine(domainAlias: String) : SSLEngine = {
+    val ctx = SecureChatSslContextFactory.ServerContext(domainAlias).createSSLEngine
     ctx.setUseClientMode(false)
     ctx
   }

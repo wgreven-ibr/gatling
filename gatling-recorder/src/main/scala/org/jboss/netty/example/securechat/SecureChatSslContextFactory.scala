@@ -15,13 +15,16 @@
  */
 package org.jboss.netty.example.securechat
 
-import java.io.{ InputStream, FileInputStream }
-import java.security.{ KeyStore, Security }
+import java.io.{FileInputStream, InputStream}
+import java.security.{KeyStore, Security}
+import javax.net.ssl.{KeyManagerFactory, SSLContext, X509KeyManager}
 
 import com.typesafe.scalalogging.StrictLogging
-
 import io.gatling.core.util.IO._
-import javax.net.ssl.{ KeyManagerFactory, SSLContext }
+import io.gatling.recorder.http.ssl.{KeyManagerDelegate, SSLCertUtil}
+
+import scala.collection.concurrent.TrieMap
+import scala.util.{Failure, Success}
 
 /**
  * Creates a bogus {@link SSLContext}. A client-side context created by this
@@ -56,51 +59,56 @@ import javax.net.ssl.{ KeyManagerFactory, SSLContext }
  */
 object SecureChatSslContextFactory extends StrictLogging {
 
+  val domainContexts = TrieMap[String, SSLContext]().empty
+
   val Protocol = "TLS"
   val PropertyKeystorePath = "gatling.recorder.keystore.path"
   val PropertyKeystorePassphrase = "gatling.recorder.keystore.passphrase"
   val DefaultKeyStore = "/gatling.jks"
   val DefaultKeyStorePassphrase = "gatling"
 
-  val ServerContext: SSLContext = {
+   def ServerContext(alias: String) : SSLContext = {
+    //TODO Because getOrElseUpdate not thread safe. Remove in 2.11.3
+    this.synchronized{
+      domainContexts.getOrElseUpdate(alias, {
+        val algorithm = Option(Security.getProperty("ssl.KeyManagerFactory.algorithm")).getOrElse("SunX509")
+        val ks = KeyStore.getInstance("JKS")
 
-    val algorithm = Option(Security.getProperty("ssl.KeyManagerFactory.algorithm")).getOrElse("SunX509")
-    val ks = KeyStore.getInstance("JKS")
-
-      def userSpecificKeyStore: Option[InputStream] = sys.props.get(PropertyKeystorePath)
-        .map { keystorePath =>
+        def userSpecificKeyStore: Option[InputStream] = sys.props.get(PropertyKeystorePath)
+          .map { keystorePath =>
           logger.info(s"Loading user-specified keystore: '$keystorePath'")
           new FileInputStream(keystorePath)
         }
 
-      def defaultKeyStore: InputStream = {
-        logger.info(s"Loading default keystore: '$DefaultKeyStore'")
-        Option(ClassLoader.getSystemResourceAsStream(DefaultKeyStore))
-          .orElse(Option(getClass.getResourceAsStream(DefaultKeyStore)))
-          .getOrElse(throw new IllegalStateException(s"Couldn't load $DefaultKeyStore neither from System ClassLoader nor from current one"))
-      }
+        val keystoreStream : InputStream = userSpecificKeyStore.getOrElse{
+          SSLCertUtil.getKeystoreCredentials(alias) match {
+            case Success(tmpKeystore) => new FileInputStream(tmpKeystore)
+            case Failure(ex) =>
+              logger.error(s"Could not create certificates or keys : ${ex.printStackTrace()}")
+              SSLCertUtil.defaultKeyStore
+          }
+        }
 
-    val keystoreStream = userSpecificKeyStore.getOrElse(defaultKeyStore)
+        val keystorePassphrase = System.getProperty(PropertyKeystorePassphrase, DefaultKeyStorePassphrase)
 
-    val keystorePassphrase = System.getProperty(PropertyKeystorePassphrase, DefaultKeyStorePassphrase)
+        withCloseable(keystoreStream) { in =>
+          val passphraseChars = keystorePassphrase.toCharArray
+          ks.load(in, passphraseChars)
 
-    withCloseable(keystoreStream) { in =>
-      val passphraseChars = keystorePassphrase.toCharArray
-      ks.load(in, passphraseChars)
+          // Set up key manager factory to use our key store
+          val kmf = KeyManagerFactory.getInstance(algorithm)
+          kmf.init(ks, passphraseChars)
 
-      // Set up key manager factory to use our key store
-      val kmf = KeyManagerFactory.getInstance(algorithm)
-      kmf.init(ks, passphraseChars)
-
-      // Initialize the SSLContext to work with our key managers.
-      val serverContext = SSLContext.getInstance(Protocol)
-      serverContext.init(kmf.getKeyManagers, null, null)
-
-      serverContext
+          // Initialize the SSLContext to work with our key managers.
+          val serverContext = SSLContext.getInstance(Protocol)
+          serverContext.init(Array(new KeyManagerDelegate(kmf.getKeyManagers()(0).asInstanceOf[X509KeyManager], alias)) , null, null)
+          serverContext
+        }
+      })
     }
   }
 
-  val ClientContext: SSLContext = {
+  def ClientContext: SSLContext = {
     val clientContext = SSLContext.getInstance(Protocol)
     clientContext.init(null, SecureChatTrustManagerFactory.LooseTrustManagers, null)
     clientContext

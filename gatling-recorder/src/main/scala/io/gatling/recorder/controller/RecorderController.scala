@@ -16,10 +16,12 @@
 package io.gatling.recorder.controller
 
 import java.nio.file.Path
+import java.security.Security
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import com.ning.http.client.uri.Uri
 import io.gatling.recorder.http.handler.remote.TimedHttpRequest
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -44,6 +46,7 @@ object RecorderController {
   def apply(props: mutable.Map[String, Any], recorderConfigFile: Option[Path] = None): Unit = {
     RecorderConfiguration.initialSetup(props, recorderConfigFile)
     new RecorderController
+    Security.addProvider(new BouncyCastleProvider)
   }
 }
 

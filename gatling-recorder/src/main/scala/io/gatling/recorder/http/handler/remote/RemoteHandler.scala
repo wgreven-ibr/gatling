@@ -15,13 +15,14 @@
  */
 package io.gatling.recorder.http.handler.remote
 
-import io.gatling.recorder.http.handler.user.SslHandlerSetter
+import java.net.InetSocketAddress
 
 import com.typesafe.scalalogging.StrictLogging
 import io.gatling.core.util.TimeHelper.nowMillis
 import io.gatling.recorder.controller.RecorderController
 import io.gatling.recorder.http.channel.BootstrapFactory._
 import io.gatling.recorder.http.handler.ScalaChannelHandler
+import io.gatling.recorder.http.handler.user.SslHandlerSetter
 import io.gatling.recorder.http.ssl.SSLEngineFactory
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
@@ -50,8 +51,8 @@ class RemoteHandler(controller: RecorderController, userChannel: Channel, var pe
           // if we're reconnecting, server channel is already set up
           if (!reconnect)
             remoteSslHandler.handshake.addListener { handshakeFuture: ChannelFuture =>
-              // TODO here, we could generate a certificate for this given peer, even based on Session principal if it could be authenticated
-              userChannel.getPipeline.addFirst(SslHandlerName, new SslHandlerSetter)
+              val inetSocketAddress = handshakeFuture.getChannel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+              userChannel.getPipeline.addFirst(SslHandlerName, new SslHandlerSetter(inetSocketAddress.getHostString))
               userChannel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK))
             }
         } else
@@ -93,4 +94,5 @@ class RemoteHandler(controller: RecorderController, userChannel: Channel, var pe
       case unknown => logger.warn(s"Received unknown message: $unknown")
     }
   }
+
 }

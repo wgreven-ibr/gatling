@@ -24,8 +24,8 @@ import com.typesafe.scalalogging.StrictLogging
 import io.gatling.recorder.http.HttpProxy
 import io.gatling.recorder.http.channel.BootstrapFactory._
 import io.gatling.recorder.http.handler.ScalaChannelHandler
-import org.jboss.netty.channel.{ Channel, ChannelFuture, ChannelHandlerContext, ExceptionEvent }
-import org.jboss.netty.handler.codec.http.{ DefaultHttpResponse, HttpMethod, HttpRequest, HttpResponseStatus, HttpVersion }
+import org.jboss.netty.channel.{Channel, ChannelFuture, ChannelHandlerContext, ExceptionEvent}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpMethod, HttpRequest, HttpResponseStatus, HttpVersion}
 import org.jboss.netty.handler.ssl.SslHandler
 
 class HttpsUserHandler(proxy: HttpProxy) extends UserHandler(proxy) with ScalaChannelHandler with StrictLogging {
@@ -55,15 +55,14 @@ class HttpsUserHandler(proxy: HttpProxy) extends UserHandler(proxy) with ScalaCh
                     sslHandler.handshake
                       .addListener { handshakeFuture: ChannelFuture =>
                         val remoteChannel = handshakeFuture.getChannel
-                        // TODO build certificate for peer
+                        val inetSocketAddress = remoteChannel.getRemoteAddress.asInstanceOf[InetSocketAddress]
                         setupRemoteChannel(userChannel, remoteChannel, proxy.controller, performConnect = false, reconnect = reconnect)
-                        if (!reconnect) {
-                          userChannel.getPipeline.addFirst(SslHandlerName, new SslHandlerSetter)
-                          userChannel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK))
-
-                        } else
-                          remoteChannel.write(request)
-                      }
+                          if (!reconnect) {
+                            userChannel.getPipeline.addFirst(SslHandlerName, new SslHandlerSetter(inetSocketAddress.getHostString))
+                            userChannel.write(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK))
+                          } else
+                            remoteChannel.write(request)
+                        }
 
                   case _ => throw new IllegalStateException("SslHandler missing from secureClientBootstrap")
                 }
