@@ -31,7 +31,7 @@ object SSLCertUtil extends StrictLogging {
   private val crtFile = new File(ClassLoader.getSystemResource("gatlingCA.cert.pem").toURI)
   private[this] var gatlingKeystore : Option[File] = None
 
-  def getKeystoreCredentials(domainAlias: String) : Try[File] = {
+  def updateKeystore(domainAlias: String) : Try[File] = {
     this.synchronized{
       for{
         (keyCA, crtCA) <- getInfoCA()

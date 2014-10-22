@@ -68,7 +68,7 @@ object SecureChatSslContextFactory extends StrictLogging {
   val DefaultKeyStorePassphrase = "gatling"
 
    def ServerContext(alias: String) : SSLContext = {
-    //TODO Because getOrElseUpdate not thread safe. Remove in 2.11.3
+    //TODO Because getOrElseUpdate not thread safe. Could be removed in 2.11.3
     this.synchronized{
       domainContexts.getOrElseUpdate(alias, {
         val algorithm = Option(Security.getProperty("ssl.KeyManagerFactory.algorithm")).getOrElse("SunX509")
@@ -81,7 +81,7 @@ object SecureChatSslContextFactory extends StrictLogging {
         }
 
         val keystoreStream : InputStream = userSpecificKeyStore.getOrElse{
-          SSLCertUtil.getKeystoreCredentials(alias) match {
+          SSLCertUtil.updateKeystore(alias) match {
             case Success(tmpKeystore) => new FileInputStream(tmpKeystore)
             case Failure(ex) =>
               logger.error(s"Could not create certificates or keys : ${ex.printStackTrace()}")
@@ -99,7 +99,7 @@ object SecureChatSslContextFactory extends StrictLogging {
           val kmf = KeyManagerFactory.getInstance(algorithm)
           kmf.init(ks, passphraseChars)
 
-          // Initialize the SSLContext to work with our key managers.
+          // Initialize the SSLContext to work with our key manager
           val serverContext = SSLContext.getInstance(Protocol)
           serverContext.init(Array(new KeyManagerDelegate(kmf.getKeyManagers()(0).asInstanceOf[X509KeyManager], alias)) , null, null)
           serverContext
