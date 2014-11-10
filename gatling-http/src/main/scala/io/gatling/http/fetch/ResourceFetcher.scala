@@ -26,7 +26,6 @@ import scala.collection.mutable
 
 import com.typesafe.scalalogging.StrictLogging
 import io.gatling.core.akka.BaseActor
-import io.gatling.core.config.GatlingConfiguration.configuration
 import io.gatling.core.filter.Filters
 import io.gatling.core.result.message.{ OK, Status }
 import io.gatling.core.session._
@@ -53,8 +52,10 @@ object ResourceFetcher extends StrictLogging {
 
   // FIXME should CssContentCache use the same key?
   case class InferredResourcesCacheKey(protocol: HttpProtocol, uri: Uri)
-  val CssContentCache = ThreadSafeCache[Uri, List[EmbeddedResource]](configuration.http.fetchedCssCacheMaxCapacity)
-  val InferredResourcesCache = ThreadSafeCache[InferredResourcesCacheKey, InferredPageResources](configuration.http.fetchedHtmlCacheMaxCapacity)
+  val CssContentCache = new ThreadSafeCache[Uri, List[EmbeddedResource]]("CssContentCache")
+  val InferredResourcesCache = new ThreadSafeCache[InferredResourcesCacheKey, InferredPageResources]("InferredResourcesCache")
+  //val CssContentCache = ThreadSafeCache[Uri, List[EmbeddedResource]](configuration.http.fetchedCssCacheMaxCapacity)
+  //val InferredResourcesCache = ThreadSafeCache[InferredResourcesCacheKey, InferredPageResources](configuration.http.fetchedHtmlCacheMaxCapacity)
 
   private def applyResourceFilters(resources: List[EmbeddedResource], filters: Option[Filters]): List[EmbeddedResource] =
     filters match {
@@ -89,7 +90,7 @@ object ResourceFetcher extends StrictLogging {
         response.lastModifiedOrEtag(protocol) match {
           case Some(newLastModifiedOrEtag) =>
             val cacheKey = InferredResourcesCacheKey(protocol, htmlDocumentUri)
-            InferredResourcesCache.get(cacheKey) match {
+            InferredResourcesCache.cache.get(cacheKey) match {
               case Some(InferredPageResources(`newLastModifiedOrEtag`, res)) =>
                 //cache entry didn't expire, use it
                 res
@@ -97,7 +98,7 @@ object ResourceFetcher extends StrictLogging {
                 // cache entry missing or expired, update it
                 val inferredResources = inferredResourcesRequests()
                 // FIXME add throttle to cache key?
-                InferredResourcesCache.put(cacheKey, InferredPageResources(newLastModifiedOrEtag, inferredResources))
+                InferredResourcesCache.cache.put(cacheKey, InferredPageResources(newLastModifiedOrEtag, inferredResources))
                 inferredResources
             }
 
@@ -108,7 +109,7 @@ object ResourceFetcher extends StrictLogging {
 
       case Some(304) =>
         // no content, retrieve from cache if exist
-        InferredResourcesCache.get(InferredResourcesCacheKey(protocol, htmlDocumentUri)) match {
+        InferredResourcesCache.cache.get(InferredResourcesCacheKey(protocol, htmlDocumentUri)) match {
           case Some(inferredPageResources) => inferredPageResources.requests
           case _ =>
             logger.warn(s"Got a 304 for $htmlDocumentUri but could find cache entry?!")
@@ -152,7 +153,7 @@ object ResourceFetcher extends StrictLogging {
   def resourceFetcherForCachedPage(htmlDocumentURI: Uri, tx: HttpTx): Option[() => ResourceFetcher] = {
 
     val inferredResources =
-      InferredResourcesCache.get(InferredResourcesCacheKey(tx.request.config.protocol, htmlDocumentURI)) match {
+      InferredResourcesCache.cache.get(InferredResourcesCacheKey(tx.request.config.protocol, htmlDocumentURI)) match {
         case None            => Nil
         case Some(resources) => resources.requests
       }
@@ -228,7 +229,7 @@ class ResourceFetcher(primaryTx: HttpTx, initialResources: Seq[HttpRequest]) ext
     val silent = HttpTx.silent(resource, false)
 
     val resourceFetched =
-      if (CssContentCache.contains(uri))
+      if (CssContentCache.cache.contains(uri))
         CssResourceFetched(uri, OK, Session.Identity, silent, None, None, "")
       else
         RegularResourceFetched(uri, OK, Session.Identity, silent)
@@ -339,7 +340,7 @@ class ResourceFetcher(primaryTx: HttpTx, initialResources: Seq[HttpRequest]) ext
   private def cssFetched(uri: Uri, status: Status, statusCode: Option[Int], lastModifiedOrEtag: Option[String], content: String): Unit = {
 
       def parseCssResources(): List[HttpRequest] = {
-        val inferred = CssContentCache.getOrElseUpdate(uri, CssParser.extractResources(uri, content))
+        val inferred = CssContentCache.cache.getOrElseUpdate(uri, CssParser.extractResources(uri, content))
         val filtered = applyResourceFilters(inferred, filters)
         resourcesToRequests(filtered, session, protocol, throttled)
       }
@@ -356,16 +357,16 @@ class ResourceFetcher(primaryTx: HttpTx, initialResources: Seq[HttpRequest]) ext
 
                 val cacheKey = InferredResourcesCacheKey(protocol, uri)
 
-                InferredResourcesCache.get(cacheKey) match {
+                InferredResourcesCache.cache.get(cacheKey) match {
                   case Some(InferredPageResources(`newLastModifiedOrEtag`, inferredResources)) =>
                     //cache entry didn't expire, use it
                     inferredResources
 
                   case _ =>
                     // cache entry missing or expired, set/update it
-                    CssContentCache.remove(uri)
+                    CssContentCache.cache.remove(uri)
                     val inferredResources = parseCssResources()
-                    InferredResourcesCache.put(InferredResourcesCacheKey(protocol, uri), InferredPageResources(newLastModifiedOrEtag, inferredResources))
+                    InferredResourcesCache.cache.put(InferredResourcesCacheKey(protocol, uri), InferredPageResources(newLastModifiedOrEtag, inferredResources))
                     inferredResources
                 }
 
@@ -376,7 +377,7 @@ class ResourceFetcher(primaryTx: HttpTx, initialResources: Seq[HttpRequest]) ext
 
           case Some(304) =>
             // resource was already cached
-            InferredResourcesCache.get(InferredResourcesCacheKey(protocol, uri)) match {
+            InferredResourcesCache.cache.get(InferredResourcesCacheKey(protocol, uri)) match {
               case Some(inferredPageResources) => inferredPageResources.requests
               case _ =>
                 logger.warn(s"Got a 304 for $uri but could find cache entry?!")

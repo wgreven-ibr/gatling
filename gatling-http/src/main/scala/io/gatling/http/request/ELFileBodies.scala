@@ -15,7 +15,7 @@
  */
 package io.gatling.http.request
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.config.Resource
 import io.gatling.core.session.Expression
 import io.gatling.core.session.el.EL
@@ -25,10 +25,11 @@ import io.gatling.core.validation.Validation
 
 object ELFileBodies {
 
-  val ELFileBodyCacheEnabled = configuration.http.elFileBodiesCacheMaxCapacity > 0
-  val ELFileBodyCache = ThreadSafeCache[String, Validation[Expression[String]]](configuration.http.elFileBodiesCacheMaxCapacity)
+  val ELFileBodyCache = new ThreadSafeCache[String, Validation[Expression[String]]]("ELFileBodyCache")
+  //val ELFileBodyCacheEnabled = configuration.http.elFileBodiesCacheMaxCapacity > 0
+  //val ELFileBodyCache = ThreadSafeCache[String, Validation[Expression[String]]](configuration.http.elFileBodiesCacheMaxCapacity)
 
-  def asString(filePath: Expression[String]): Expression[String] = {
+  def asString(filePath: Expression[String])(implicit configuration: GatlingConfiguration): Expression[String] = {
 
       def compileFile(path: String): Validation[Expression[String]] =
         Resource.requestBody(path)
@@ -37,10 +38,8 @@ object ELFileBodies {
           }).map(_.el[String])
 
       def pathToExpression(path: String) =
-        if (ELFileBodyCacheEnabled)
-          ELFileBodyCache.getOrElsePutIfAbsent(path, compileFile(path))
-        else
-          compileFile(path)
+        if (ELFileBodyCache.enabled) ELFileBodyCache.getOrElsePutIfAbsent(path, compileFile(path))
+        else compileFile(path)
 
     session =>
       for {

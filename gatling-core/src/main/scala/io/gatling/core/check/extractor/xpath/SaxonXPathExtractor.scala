@@ -35,9 +35,11 @@ object SaxonXPathExtractor {
   val TheProcessor = new Processor(false)
   val TheDocumentBuilder = TheProcessor.newDocumentBuilder
 
-  val XPathCacheEnabled = configuration.core.extract.xpath.cacheMaxCapacity > 0
-  val CompilerCache = ThreadSafeCache[List[(String, String)], XPathCompiler](configuration.core.extract.xpath.cacheMaxCapacity)
-  val XPathExecutableCache = ThreadSafeCache[String, XPathExecutable](configuration.core.extract.xpath.cacheMaxCapacity)
+  val CompilerCache = new ThreadSafeCache[List[(String, String)], XPathCompiler]("CompilerCache")
+  val XPathExecutableCache = new ThreadSafeCache[String, XPathExecutable]("XPathExecutableCache")
+  //val XPathCacheEnabled = configuration.core.extract.xpath.cacheMaxCapacity > 0
+  //val CompilerCache = ThreadSafeCache[List[(String, String)], XPathCompiler](configuration.core.extract.xpath.cacheMaxCapacity)
+  //val XPathExecutableCache = ThreadSafeCache[String, XPathExecutable](configuration.core.extract.xpath.cacheMaxCapacity)
 
   def parse(inputSource: InputSource) = {
     inputSource.setEncoding(configuration.core.encoding)
@@ -59,7 +61,7 @@ object SaxonXPathExtractor {
           compiler
         }
 
-      if (XPathCacheEnabled)
+      if (XPathExecutableCache.enabled)
         XPathExecutableCache.getOrElsePutIfAbsent(expression, CompilerCache.getOrElsePutIfAbsent(namespaces, xPathCompiler(namespaces)).compile(expression))
       else
         xPathCompiler(namespaces).compile(expression)

@@ -18,14 +18,14 @@ package io.gatling.core.check.extractor.regex
 import java.util.regex.Pattern
 
 import io.gatling.core.check.extractor._
-import io.gatling.core.config.GatlingConfiguration.configuration
 import io.gatling.core.util.cache._
 import io.gatling.core.validation.{ SuccessWrapper, Validation }
 
 object RegexExtractor {
 
-  val PatternCacheEnabled = configuration.core.extract.regex.cacheMaxCapacity > 0
-  val PatternCache = ThreadSafeCache[String, Pattern](configuration.core.extract.regex.cacheMaxCapacity)
+  val PatternCache = new ThreadSafeCache[String, Pattern]("PatternCache")
+  //val PatternCacheEnabled = configuration.core.extract.regex.cacheMaxCapacity > 0
+  //val PatternCache = ThreadSafeCache[String, Pattern](configuration.core.extract.regex.cacheMaxCapacity)
 }
 
 trait RegexExtractor {
@@ -33,10 +33,8 @@ trait RegexExtractor {
   import RegexExtractor._
 
   def compilePattern(regex: String) =
-    if (PatternCacheEnabled)
-      PatternCache.getOrElsePutIfAbsent(regex, Pattern.compile(regex))
-    else
-      Pattern.compile(regex)
+    if (PatternCache.enabled) PatternCache.getOrElsePutIfAbsent(regex, Pattern.compile(regex))
+    else Pattern.compile(regex)
 
   def extractAll[X: GroupExtractor](chars: CharSequence, pattern: String): Seq[X] = {
 
