@@ -26,7 +26,7 @@ import com.ning.http.client.providers.netty.channel.pool.ChannelPoolPartitionSel
 import com.typesafe.scalalogging.StrictLogging
 
 import io.gatling.core.akka.GatlingActorSystem
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.config.Protocol
 import io.gatling.core.filter.Filters
 import io.gatling.core.session.{ Session, Expression, ExpressionWrapper }
@@ -43,7 +43,7 @@ import io.gatling.http.response.Response
  */
 object HttpProtocol {
 
-  val DefaultHttpProtocol = HttpProtocol(
+  def DefaultHttpProtocol(implicit configuration: GatlingConfiguration) = HttpProtocol(
     baseURLs = Nil,
     warmUpUrl = configuration.http.warmUpUrl,
     enginePart = HttpProtocolEnginePart(

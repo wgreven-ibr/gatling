@@ -21,13 +21,13 @@ import io.gatling.charts.component.{ ComponentLibrary, GroupedCount, RequestStat
 import io.gatling.charts.config.ChartsFiles._
 import io.gatling.charts.result.reader.RequestPath
 import io.gatling.charts.template.{ ConsoleTemplate, StatsJsTemplate, StatsJsonTemplate }
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.result.{ Group, GroupStatsPath, RequestStatsPath }
 import io.gatling.core.result.message.{ KO, OK }
 import io.gatling.core.result.reader.DataReader
 import io.gatling.core.util.NumberHelper._
 
-class StatsReportGenerator(runOn: String, dataReader: DataReader, componentLibrary: ComponentLibrary) {
+class StatsReportGenerator(runOn: String, dataReader: DataReader, componentLibrary: ComponentLibrary)(implicit configuration: GatlingConfiguration) {
 
   def generate(): Unit = {
 

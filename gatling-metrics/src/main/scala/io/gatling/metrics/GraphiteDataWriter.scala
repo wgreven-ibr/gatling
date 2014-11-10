@@ -23,8 +23,7 @@ import akka.actor.ActorDSL.actor
 import io.gatling.core.akka.BaseActor
 import io.gatling.core.assertion.Assertion
 import io.gatling.core.config.GatlingConfiguration
-import io.gatling.core.config.GatlingConfiguration.{ configuration => gatlingConfiguration }
-import io.gatling.core.result.writer.{ DataWriter, GroupMessage, RequestMessage, RunMessage, ShortScenarioDescription, UserMessage }
+import io.gatling.core.result.writer._
 import io.gatling.core.util.TimeHelper.nowSeconds
 import io.gatling.metrics.sender.MetricsSender
 import io.gatling.metrics.types._
@@ -36,11 +35,9 @@ object GraphiteDataWriter {
   val allUsersKey = usersRootKey / "allUsers"
 }
 
-class GraphiteDataWriter extends DataWriter {
+class GraphiteDataWriter(implicit configuration: GatlingConfiguration) extends DataWriter {
   import GraphiteDataWriter._
   import GraphitePath._
-
-  implicit val configuration = gatlingConfiguration
 
   private var graphiteSender: ActorRef = _
 

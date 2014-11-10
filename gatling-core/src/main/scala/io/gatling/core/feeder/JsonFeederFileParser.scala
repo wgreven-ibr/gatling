@@ -23,7 +23,7 @@ import io.gatling.core.json.Jackson
 
 import scala.collection._
 import scala.collection.JavaConversions._
-import io.gatling.core.config.GatlingConfiguration._
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.config.Resource
 import io.gatling.core.util.IO._
 
@@ -39,7 +39,7 @@ object JsonFeederFileParser {
       stream(is).toVector
     }
 
-  def stream(is: InputStream): Iterator[Record[Any]] = {
+  def stream(is: InputStream)(implicit configuration: GatlingConfiguration): Iterator[Record[Any]] = {
 
     Jackson.parse(is, configuration.core.charset) match {
 

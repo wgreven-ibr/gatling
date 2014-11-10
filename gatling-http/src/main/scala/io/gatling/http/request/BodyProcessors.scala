@@ -17,7 +17,7 @@ package io.gatling.http.request
 
 import java.io.FileInputStream
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.Session
 import io.gatling.core.util.FastByteArrayInputStream
 import io.gatling.core.util.IO._
@@ -38,7 +38,7 @@ object BodyProcessors {
     ByteArrayBody(gzippedBytes)
   }
 
-  val Stream = (body: Body) => {
+  def Stream(implicit configuration: GatlingConfiguration) = (body: Body) => {
 
     val stream = body match {
       case StringBody(string) => (session: Session) => string(session).map(s => new FastByteArrayInputStream(s.getBytes(configuration.core.encoding)))

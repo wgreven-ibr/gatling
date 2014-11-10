@@ -18,12 +18,16 @@ package io.gatling.http.request.builder
 import com.ning.http.client.{ RequestBuilder => AHCRequestBuilder }
 import com.ning.http.client.multipart.StringPart
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.Session
 import io.gatling.core.validation.{ SuccessWrapper, Validation }
 import io.gatling.http.config.HttpProtocol
 
-class HttpRequestWithParamsExpressionBuilder(commonAttributes: CommonAttributes, httpAttributes: HttpAttributes, params: List[HttpParam], protocol: HttpProtocol)
+class HttpRequestWithParamsExpressionBuilder(
+  commonAttributes: CommonAttributes,
+  httpAttributes: HttpAttributes,
+  params: List[HttpParam],
+  protocol: HttpProtocol)(implicit configuration: GatlingConfiguration)
     extends HttpRequestExpressionBuilder(commonAttributes, httpAttributes, protocol) {
 
   override def configureParts(session: Session)(requestBuilder: AHCRequestBuilder): Validation[AHCRequestBuilder] = {

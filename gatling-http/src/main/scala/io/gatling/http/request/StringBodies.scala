@@ -15,11 +15,11 @@
  */
 package io.gatling.http.request
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.Expression
 
 object StringBodies {
 
-  def asBytes(expression: Expression[String]): Expression[Array[Byte]] =
+  def asBytes(expression: Expression[String])(implicit configuration: GatlingConfiguration): Expression[Array[Byte]] =
     expression.map(_.getBytes(configuration.core.charset))
 }

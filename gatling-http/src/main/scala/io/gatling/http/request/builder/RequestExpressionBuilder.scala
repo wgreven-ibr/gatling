@@ -18,7 +18,7 @@ package io.gatling.http.request.builder
 import com.ning.http.client.uri.Uri
 import com.ning.http.client.{ Request, RequestBuilder => AHCRequestBuilder }
 import com.typesafe.scalalogging.StrictLogging
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.{ Expression, Session }
 import io.gatling.core.validation.{ FailureWrapper, SuccessWrapper, Validation }
 import io.gatling.http.HeaderNames
@@ -114,7 +114,7 @@ abstract class RequestExpressionBuilder(commonAttributes: CommonAttributes, prot
       .flatMap(configureHeaders(session))
       .flatMap(configureRealm(session))
 
-  def build: Expression[Request] = {
+  def build(implicit configuration: GatlingConfiguration): Expression[Request] = {
 
     val disableUrlEscaping = commonAttributes.disableUrlEncoding.getOrElse(protocol.requestPart.disableUrlEscaping)
 

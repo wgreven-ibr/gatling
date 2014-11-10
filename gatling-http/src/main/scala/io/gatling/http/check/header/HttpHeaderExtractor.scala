@@ -18,14 +18,14 @@ package io.gatling.http.check.header
 import java.net.URLDecoder
 
 import io.gatling.core.check.extractor._
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.validation.{ SuccessWrapper, Validation }
 import io.gatling.http.HeaderNames
 import io.gatling.http.response.Response
 
 object HttpHeaderExtractor {
 
-  def decode(headerName: String, headerValue: String) =
+  def decode(headerName: String, headerValue: String)(implicit configuration: GatlingConfiguration) =
     if (headerName == HeaderNames.Location)
       URLDecoder.decode(headerValue, configuration.core.encoding)
     else

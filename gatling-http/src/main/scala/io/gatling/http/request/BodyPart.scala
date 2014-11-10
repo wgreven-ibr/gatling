@@ -20,7 +20,7 @@ import java.nio.charset.Charset
 
 import com.ning.http.client.multipart.{ ByteArrayPart, FilePart, Part, PartBase, StringPart }
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.{ Expression, RichExpression, Session, resolveOptionalExpression }
 import io.gatling.core.util.IO._
 import io.gatling.core.validation.Validation
@@ -29,11 +29,11 @@ object BodyPart {
 
   def rawFileBodyPart(name: Option[Expression[String]], filePath: Expression[String]): BodyPart = fileBodyPart(name, RawFileBodies.asFile(filePath))
   def elFileBodyPart(name: Option[Expression[String]], filePath: Expression[String]): BodyPart = stringBodyPart(name, ELFileBodies.asString(filePath))
-  def stringBodyPart(name: Option[Expression[String]], string: Expression[String]): BodyPart = BodyPart(name, stringBodyPartBuilder(string), BodyPartAttributes(charset = Some(configuration.core.charset)))
+  def stringBodyPart(name: Option[Expression[String]], string: Expression[String])(implicit configuration: GatlingConfiguration): BodyPart = BodyPart(name, stringBodyPartBuilder(string), BodyPartAttributes(charset = Some(configuration.core.charset)))
   def byteArrayBodyPart(name: Option[Expression[String]], bytes: Expression[Array[Byte]]): BodyPart = BodyPart(name, byteArrayBodyPartBuilder(bytes), BodyPartAttributes())
   def fileBodyPart(name: Option[Expression[String]], file: Expression[File]): BodyPart = BodyPart(name, fileBodyPartBuilder(file), BodyPartAttributes())
 
-  private def stringBodyPartBuilder(string: Expression[String])(name: String, contentType: Option[String], charset: Option[Charset], fileName: Option[String], contentId: Option[String], transferEncoding: Option[String]): Expression[PartBase] =
+  private def stringBodyPartBuilder(string: Expression[String])(name: String, contentType: Option[String], charset: Option[Charset], fileName: Option[String], contentId: Option[String], transferEncoding: Option[String])(implicit configuration: GatlingConfiguration): Expression[PartBase] =
     fileName match {
       case None => string.map { resolvedString =>
         new StringPart(name, resolvedString, contentType.orNull, charset.getOrElse(configuration.core.charset), contentId.orNull, transferEncoding.orNull)

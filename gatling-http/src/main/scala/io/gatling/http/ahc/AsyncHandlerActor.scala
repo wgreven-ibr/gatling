@@ -24,7 +24,7 @@ import akka.actor.ActorDSL.actor
 import akka.routing.RoundRobinPool
 import io.gatling.core.akka.{ AkkaDefaults, BaseActor }
 import io.gatling.core.check.Check
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.result.message.{ KO, OK, Status }
 import io.gatling.core.session.Session
 import io.gatling.core.result.writer.DataWriterClient
@@ -211,7 +211,7 @@ class AsyncHandlerActor extends BaseActor with DataWriterClient {
   /**
    * This method processes the response if needed for each checks given by the user
    */
-  private def processResponse(tx: HttpTx, response: Response): Unit = {
+  private def processResponse(tx: HttpTx, response: Response)(implicit configuration: GatlingConfiguration): Unit = {
 
       def redirectRequest(redirectUri: Uri, sessionWithUpdatedCookies: Session): Request = {
         val originalRequest = tx.request.ahcRequest

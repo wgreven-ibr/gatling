@@ -16,7 +16,7 @@
 package io.gatling
 
 import java.security.MessageDigest
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.util.StringHelper._
 
 package object charts {
@@ -28,7 +28,7 @@ package object charts {
      *
      * @return a simplified string
      */
-    def toFileName = {
+    def toFileName(implicit configuration: GatlingConfiguration) = {
 
       val trimmed = string.trim match {
         case "" => "missing_name"

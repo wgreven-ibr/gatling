@@ -89,7 +89,7 @@ object RecorderConfiguration extends StrictLogging {
   def saveConfig(): Unit = {
     // Remove request bodies folder configuration (transient), keep only Gatling-related properties
     val configToSave = configuration.config.withoutPath(ConfigKeys.core.RequestBodiesFolder).root.withOnlyKey(ConfigKeys.ConfigRoot)
-    configFile.foreach(file => withCloseable(createAndOpen(file).writer())(_.write(configToSave.render(RenderOptions))))
+    configFile.foreach(file => withCloseable(createAndOpen(file).writer)(_.write(configToSave.render(RenderOptions))))
   }
 
   private[config] def createAndOpen(path: Path): Path = {

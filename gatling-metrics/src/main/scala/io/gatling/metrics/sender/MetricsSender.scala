@@ -17,11 +17,11 @@ package io.gatling.metrics.sender
 
 import java.nio.charset.StandardCharsets.UTF_8
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 
 object MetricsSender {
 
-  def newMetricsSender: MetricsSender = configuration.data.graphite.protocol.toLowerCase match {
+  def newMetricsSender(implicit configuration: GatlingConfiguration): MetricsSender = configuration.data.graphite.protocol.toLowerCase match {
     case "tcp" => new TcpSender
     case "udp" => new UdpSender
     case p @ _ => throw new RuntimeException(s"The protocol '$p' specified in the configuration is not supported")

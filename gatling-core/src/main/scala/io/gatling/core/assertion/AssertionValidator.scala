@@ -15,7 +15,7 @@
  */
 package io.gatling.core.assertion
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.result.{ GroupStatsPath, RequestStatsPath, StatsPath }
 import io.gatling.core.result.message.{ KO, OK, Status }
 import io.gatling.core.result.reader.{ GeneralStats, DataReader }
@@ -27,8 +27,8 @@ object AssertionValidator {
   type ValidatedRequestPath = Validation[Option[Status] => List[GeneralStats]]
   type StatsByStatus = Option[Status] => List[GeneralStats]
 
-  val Percentile1 = configuration.charting.indicators.percentile1.toRank
-  val Percentile2 = configuration.charting.indicators.percentile2.toRank
+  def percentile1(implicit configuration: GatlingConfiguration) = configuration.charting.indicators.percentile1.toRank
+  def percentile2(implicit configuration: GatlingConfiguration) = configuration.charting.indicators.percentile2.toRank
 
   case class AssertionResult(result: Boolean, message: String)
   private case class ResolvedMetric(stats: List[GeneralStats], message: String)
@@ -118,8 +118,8 @@ object AssertionValidator {
       case Max               => ResolvedSelection(resolvedMetric.stats.map(_.max), "max")
       case Mean              => ResolvedSelection(resolvedMetric.stats.map(_.mean), "mean")
       case StandardDeviation => ResolvedSelection(resolvedMetric.stats.map(_.stdDev), "standard deviation")
-      case Percentiles1      => ResolvedSelection(resolvedMetric.stats.map(_.percentile1), s"$Percentile1 percentile")
-      case Percentiles2      => ResolvedSelection(resolvedMetric.stats.map(_.percentile2), s"$Percentile2 percentile")
+      case Percentiles1      => ResolvedSelection(resolvedMetric.stats.map(_.percentile1), s"$percentile1 percentile")
+      case Percentiles2      => ResolvedSelection(resolvedMetric.stats.map(_.percentile2), s"$percentile2 percentile")
     }
     resolveCondition(assertion, resolvedSelection.value, s"$path: ${resolvedSelection.message} of ${resolvedMetric.message}")
   }

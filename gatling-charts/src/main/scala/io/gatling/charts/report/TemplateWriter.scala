@@ -25,5 +25,5 @@ import io.gatling.core.util.PathHelper._
 class TemplateWriter(path: Path) {
 
   def writeToFile(output: Fastring): Unit =
-    withCloseable(path.writer()) { output.appendTo }
+    withCloseable(path.writer) { output.appendTo }
 }

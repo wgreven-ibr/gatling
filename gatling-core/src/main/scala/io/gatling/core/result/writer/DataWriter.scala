@@ -22,7 +22,7 @@ import akka.actor.{ Actor, ActorRef, Props }
 import akka.util.Timeout
 import io.gatling.core.akka.{ AkkaDefaults, BaseActor }
 import io.gatling.core.assertion.Assertion
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.controller.{ DataWritersInitialized, DataWritersTerminated }
 import io.gatling.core.result.message.Status
 import io.gatling.core.scenario.Scenario
@@ -43,7 +43,7 @@ object DataWriter extends AkkaDefaults {
 
   def dispatch(message: Any): Unit = instances.foreach(_ ! message)
 
-  def init(assertions: Seq[Assertion], runMessage: RunMessage, scenarios: Seq[Scenario], replyTo: ActorRef): Unit = {
+  def init(assertions: Seq[Assertion], runMessage: RunMessage, scenarios: Seq[Scenario], replyTo: ActorRef)(implicit configuration: GatlingConfiguration): Unit = {
 
     _instances = {
       val dw = configuration.data.dataWriterClasses.map { className =>

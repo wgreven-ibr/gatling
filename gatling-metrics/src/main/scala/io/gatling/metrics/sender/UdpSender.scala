@@ -19,9 +19,9 @@ import java.net.{ DatagramPacket, DatagramSocket, InetSocketAddress }
 import java.nio.channels.DatagramChannel
 
 import io.gatling.core.akka.AkkaDefaults
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 
-class UdpSender extends MetricsSender with AkkaDefaults {
+class UdpSender(implicit configuration: GatlingConfiguration) extends MetricsSender with AkkaDefaults {
 
   private val address = new InetSocketAddress(configuration.data.graphite.host, configuration.data.graphite.port)
   private val socket: DatagramSocket = DatagramChannel.open.socket

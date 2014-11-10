@@ -36,7 +36,7 @@ object GatlingConfiguration extends StrictLogging {
 
   // FIXME
   private var thisConfiguration: GatlingConfiguration = _
-  def configuration = thisConfiguration
+  implicit def configuration = thisConfiguration
 
   implicit class ConfigStringSeq(val string: String) extends AnyVal {
     def toStringList: List[String] = string.trim match {

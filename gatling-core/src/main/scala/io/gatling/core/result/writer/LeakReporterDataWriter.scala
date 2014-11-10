@@ -22,11 +22,11 @@ import io.gatling.core.assertion.Assertion
 import scala.collection.mutable
 import scala.concurrent.duration.DurationInt
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 
 import io.gatling.core.result.message.{ End, Start }
 
-class LeakReporterDataWriter extends DataWriter {
+class LeakReporterDataWriter(implicit configuration: GatlingConfiguration) extends DataWriter {
 
   val noActivityTimeout = configuration.data.leak.noActivityTimeout seconds
   private var lastTouch = 0L

@@ -18,13 +18,13 @@ package io.gatling.http.check.body
 import com.typesafe.scalalogging.StrictLogging
 
 import io.gatling.core.check.{ DefaultMultipleFindCheckBuilder, Preparer }
-import io.gatling.core.check.extractor.jsonpath.{ CountJsonPathExtractor, JsonFilter, MultipleJsonPathExtractor, SingleJsonPathExtractor }
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.check.extractor.jsonpath._
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.json.{ Jackson, Boon }
 import io.gatling.core.session.{ Expression, RichExpression }
 import io.gatling.core.validation.{ FailureWrapper, SuccessWrapper }
 import io.gatling.http.check.{ HttpCheck, HttpCheckBuilders }
-import io.gatling.http.response.{ ByteArrayResponseBodyUsage, InputStreamResponseBodyUsage, Response, ResponseBodyUsageStrategy, StringResponseBodyUsage }
+import io.gatling.http.response._
 
 trait HttpBodyJsonPathOfType {
   self: HttpBodyJsonPathCheckBuilder[String] =>
@@ -46,7 +46,7 @@ object HttpBodyJsonPathCheckBuilder extends StrictLogging {
         message.failure
     }
 
-  val Preparer: Preparer[Response, Any] =
+  def Preparer(implicit configuration: GatlingConfiguration): Preparer[Response, Any] =
     if (configuration.core.extract.jsonPath.preferJackson)
       handleParseException { response =>
         Jackson.parse(response.body.stream, response.charset)
@@ -75,7 +75,7 @@ object HttpBodyJsonPathCheckBuilder extends StrictLogging {
         InputStreamResponseBodyUsage
   }
 
-  val ResponseBodyUsageStrategy =
+  def ResponseBodyUsageStrategy(implicit configuration: GatlingConfiguration) =
     if (configuration.core.extract.jsonPath.preferJackson) JacksonResponseBodyUsageStrategy
     else BoonResponseBodyUsageStrategy
 

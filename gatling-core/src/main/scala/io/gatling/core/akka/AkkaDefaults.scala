@@ -18,12 +18,12 @@ package io.gatling.core.akka
 import scala.concurrent.duration.DurationInt
 
 import akka.pattern.AskSupport
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 
 trait AkkaDefaults extends AskSupport {
 
   implicit def system = GatlingActorSystem.instance
   implicit def dispatcher = system.dispatcher
   implicit def scheduler = system.scheduler
-  val simulationTimeOut = configuration.core.timeOut.simulation seconds
+  def simulationTimeOut(implicit configuration: GatlingConfiguration) = configuration.core.timeOut.simulation seconds
 }

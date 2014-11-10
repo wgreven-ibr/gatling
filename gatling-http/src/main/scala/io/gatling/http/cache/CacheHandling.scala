@@ -20,7 +20,7 @@ import com.ning.http.client.date.RFC2616DateParser
 import com.ning.http.client.uri.Uri
 import com.typesafe.scalalogging.StrictLogging
 
-import io.gatling.core.config.GatlingConfiguration._
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.{ Expression, Session, SessionPrivateAttributes }
 import io.gatling.core.util.NumberHelper.extractLongValue
 import io.gatling.core.util.TimeHelper.nowMillis
@@ -38,7 +38,7 @@ object CacheHandling extends StrictLogging {
   def getPermanentRedirectStore(session: Session): Option[Cache[Uri, Uri]] =
     session(HttpPermanentRedirectStoreAttributeName).asOption[Cache[Uri, Uri]]
 
-  def getOrCreatePermanentRedirectStore(session: Session): Cache[Uri, Uri] =
+  def getOrCreatePermanentRedirectStore(session: Session)(implicit configuration: GatlingConfiguration): Cache[Uri, Uri] =
     getPermanentRedirectStore(session) match {
       case Some(store) => store
       case _           => Cache[Uri, Uri](configuration.http.redirectPerUserCacheMaxCapacity)
@@ -49,7 +49,7 @@ object CacheHandling extends StrictLogging {
   private def getExpireStore(session: Session): Option[Cache[Uri, Long]] =
     session(HttpExpireStoreAttributeName).asOption[Cache[Uri, Long]]
 
-  def getOrCreateExpireStore(session: Session): Cache[Uri, Long] =
+  def getOrCreateExpireStore(session: Session)(implicit configuration: GatlingConfiguration): Cache[Uri, Long] =
     getExpireStore(session) match {
       case Some(store) => store
       case _           => Cache[Uri, Long](configuration.http.expirePerUserCacheMaxCapacity)
@@ -71,7 +71,7 @@ object CacheHandling extends StrictLogging {
   def getLastModifiedStore(session: Session): Option[Cache[Uri, String]] =
     session(HttpLastModifiedStoreAttributeName).asOption[Cache[Uri, String]]
 
-  def getOrCreateLastModifiedStore(session: Session): Cache[Uri, String] =
+  def getOrCreateLastModifiedStore(session: Session)(implicit configuration: GatlingConfiguration): Cache[Uri, String] =
     getLastModifiedStore(session) match {
       case Some(store) => store
       case _           => Cache[Uri, String](configuration.http.lastModifiedPerUserCacheMaxCapacity)
@@ -85,7 +85,7 @@ object CacheHandling extends StrictLogging {
   def getEtagStore(session: Session): Option[Cache[Uri, String]] =
     session(HttpEtagStoreAttributeName).asOption[Cache[Uri, String]]
 
-  def getOrCreateEtagStore(session: Session): Cache[Uri, String] = getEtagStore(session) match {
+  def getOrCreateEtagStore(session: Session)(implicit configuration: GatlingConfiguration): Cache[Uri, String] = getEtagStore(session) match {
     case Some(store) => store
     case _           => Cache[Uri, String](configuration.http.etagPerUserCacheMaxCapacity)
   }

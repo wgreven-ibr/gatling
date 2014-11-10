@@ -30,7 +30,6 @@ import io.gatling.charts.report.ReportsGenerator
 import io.gatling.core.assertion.AssertionValidator
 import io.gatling.core.config.{ GatlingFiles, GatlingPropertiesBuilder }
 import io.gatling.core.config.GatlingConfiguration
-import io.gatling.core.config.GatlingConfiguration.configuration
 import io.gatling.core.result.reader.DataReader
 import io.gatling.core.runner.{ Runner, Selection }
 import io.gatling.core.scenario.Simulation
@@ -66,7 +65,7 @@ object Gatling {
     else GatlingStatusCodes.InvalidArguments
   }
 }
-class Gatling(props: mutable.Map[String, _], simulationClass: Option[Class[Simulation]]) {
+class Gatling(props: mutable.Map[String, _], simulationClass: Option[Class[Simulation]])(implicit configuration: GatlingConfiguration) {
 
   type SelectedSingleSimulation = Option[Class[Simulation]]
   type AllSimulations = List[Class[Simulation]]

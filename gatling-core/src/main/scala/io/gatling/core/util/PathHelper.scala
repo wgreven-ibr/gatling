@@ -17,13 +17,12 @@ package io.gatling.core.util
 
 import java.io.File
 import java.net.{ URI, URL }
-import java.nio.charset.Charset
 import java.nio.file._
 
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 
 object PathHelper {
 
@@ -76,7 +75,7 @@ object PathHelper {
 
     def ifFile[T](f: File => T): Option[T] = if (isFile) Some(f(path.toFile)) else None
 
-    def writer(charset: Charset = configuration.core.charset) = Files.newBufferedWriter(path, charset)
+    def writer(implicit configuration: GatlingConfiguration) = Files.newBufferedWriter(path, configuration.core.charset)
 
     def copyTo(other: Path, options: CopyOption*) = Files.copy(path, other, options: _*)
 

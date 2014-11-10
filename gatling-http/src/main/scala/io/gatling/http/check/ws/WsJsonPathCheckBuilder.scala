@@ -16,7 +16,7 @@
 package io.gatling.http.check.ws
 
 import io.gatling.core.check.{ DefaultMultipleFindCheckBuilder, Extender, Preparer }
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.json.{ Jackson, Boon }
 import io.gatling.core.check.extractor.jsonpath._
 import io.gatling.http.check.body.HttpBodyJsonPathCheckBuilder.handleParseException
@@ -30,7 +30,7 @@ trait WsJsonPathOfType {
 
 object WsJsonPathCheckBuilder {
 
-  val WsJsonPathPreparer: Preparer[String, Any] =
+  def WsJsonPathPreparer(implicit configuration: GatlingConfiguration): Preparer[String, Any] =
     if (configuration.core.extract.jsonPath.preferJackson) handleParseException(Jackson.parse)
     else handleParseException(Boon.parse)
 

@@ -33,7 +33,7 @@ import com.typesafe.scalalogging.StrictLogging
 import akka.actor.ActorRef
 import io.gatling.core.ConfigKeys
 import io.gatling.core.akka.AkkaDefaults
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.controller.{ Controller, ThrottledRequest }
 import io.gatling.core.session.{ Session, SessionPrivateAttributes }
 import io.gatling.core.util.TimeHelper.nowMillis
@@ -113,7 +113,7 @@ object HttpEngine extends AkkaDefaults with StrictLogging {
   }
 }
 
-class HttpEngine extends AkkaDefaults with StrictLogging {
+class HttpEngine(implicit configuration: GatlingConfiguration) extends AkkaDefaults with StrictLogging {
 
   val applicationThreadPool = Executors.newCachedThreadPool(new ThreadFactory {
     override def newThread(r: Runnable) = {

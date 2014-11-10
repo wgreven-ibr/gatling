@@ -23,7 +23,7 @@ import scala.math.{ ceil, floor }
 
 import com.dongxiguo.fastring.Fastring.Implicits._
 
-import io.gatling.core.config.GatlingConfiguration.configuration
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.util.StringHelper._
 import io.gatling.core.result.ErrorStats
 
@@ -66,7 +66,7 @@ object ConsoleSummary {
         fast"> ${actionName.rightPad(OutputLength - 24)} (OK=${successfulCount.toString.rightPad(6)} KO=${failedCount.toString.rightPad(6)})"
       }
 
-      def writeDetailedRequestsCounter: Fastring =
+      def writeDetailedRequestsCounter(implicit configuration: GatlingConfiguration): Fastring =
         if (configuration.data.console.light)
           EmptyFastring
         else
