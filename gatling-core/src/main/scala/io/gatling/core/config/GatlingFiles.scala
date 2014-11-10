@@ -19,7 +19,6 @@ import java.nio.file.Path
 
 import scala.util.Properties.{ envOrElse, propOrElse }
 
-import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.util.PathHelper._
 
 object GatlingFiles {
