@@ -20,6 +20,7 @@ import java.net.InetAddress
 import com.ning.http.client.{ RequestBuilderBase, Request, SignatureCalculator, Realm }
 import com.typesafe.scalalogging.StrictLogging
 
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.filter.{ BlackList, Filters, WhiteList }
 import io.gatling.core.session._
 import io.gatling.core.session.el.EL
@@ -35,7 +36,7 @@ import io.gatling.http.util.HttpHelper
  */
 object HttpProtocolBuilder {
 
-  val DefaultHttpProtocolBuilder = new HttpProtocolBuilder(HttpProtocol.DefaultHttpProtocol)
+  def DefaultHttpProtocolBuilder(implicit config: GatlingConfiguration) = new HttpProtocolBuilder(HttpProtocol.DefaultHttpProtocol)
 
   implicit def toHttpProtocol(builder: HttpProtocolBuilder): HttpProtocol = builder.build
 }

@@ -28,7 +28,7 @@ import org.scalatest.{ FlatSpec, Matchers }
 
 class HttpTxSpec extends FlatSpec with Matchers with MockitoSugar {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTestPure()
 
   trait Context {
     val httpEngineMock = mock[HttpEngine]

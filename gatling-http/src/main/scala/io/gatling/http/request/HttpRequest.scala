@@ -17,6 +17,7 @@ package io.gatling.http.request
 
 import com.ning.http.client.{ RequestBuilder, SignatureCalculator, Request }
 
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session._
 import io.gatling.core.validation._
 import io.gatling.http.check.HttpCheck
@@ -41,7 +42,7 @@ case class HttpRequestDef(
     signatureCalculator: Option[Expression[SignatureCalculator]],
     config: HttpRequestConfig) {
 
-  def build(requestName: String, session: Session): Validation[HttpRequest] = {
+  def build(requestName: String, session: Session)(implicit conf: GatlingConfiguration): Validation[HttpRequest] = {
 
       def sign(request: Request, signatureCalculator: Option[SignatureCalculator]): Request =
         signatureCalculator match {

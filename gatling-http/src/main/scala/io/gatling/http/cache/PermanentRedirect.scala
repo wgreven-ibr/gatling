@@ -18,13 +18,14 @@ package io.gatling.http.cache
 import com.ning.http.client.uri.Uri
 
 import scala.annotation.tailrec
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.Session
 import io.gatling.http.ahc.HttpTx
 import com.ning.http.client.{ Request, RequestBuilder }
 
 object PermanentRedirect {
 
-  def addRedirect(session: Session, from: Uri, to: Uri): Session = {
+  def addRedirect(session: Session, from: Uri, to: Uri)(implicit config: GatlingConfiguration): Session = {
     val redirectStorage = CacheHandling.getOrCreatePermanentRedirectStore(session)
     session.set(CacheHandling.HttpPermanentRedirectStoreAttributeName, redirectStorage + (from -> to))
   }

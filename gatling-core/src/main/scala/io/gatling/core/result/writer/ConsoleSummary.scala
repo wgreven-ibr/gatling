@@ -41,7 +41,7 @@ object ConsoleSummary {
             globalRequestCounters: RequestCounters,
             requestsCounters: Map[String, RequestCounters],
             errorsCounters: Map[String, Int],
-            time: LocalDateTime = LocalDateTime.now) = {
+            time: LocalDateTime = LocalDateTime.now)(implicit configuration: GatlingConfiguration) = {
 
       def writeUsersCounters(scenarioName: String, userCounters: UserCounters): Fastring = {
 
@@ -66,7 +66,7 @@ object ConsoleSummary {
         fast"> ${actionName.rightPad(OutputLength - 24)} (OK=${successfulCount.toString.rightPad(6)} KO=${failedCount.toString.rightPad(6)})"
       }
 
-      def writeDetailedRequestsCounter(implicit configuration: GatlingConfiguration): Fastring =
+      def writeDetailedRequestsCounter: Fastring =
         if (configuration.data.console.light)
           EmptyFastring
         else

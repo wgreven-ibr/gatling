@@ -28,7 +28,7 @@ import io.gatling.core.test.ValidationValues
 class HttpRequestBuilderSpec extends FlatSpec with Matchers with ValidationValues {
 
   // Default config
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTestPure()
 
   private def performTest(addSignatureCalculator: HttpRequestBuilder => HttpRequestBuilder): Unit = {
 

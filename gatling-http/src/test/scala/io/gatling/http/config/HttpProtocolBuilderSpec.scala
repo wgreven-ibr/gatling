@@ -22,7 +22,7 @@ import io.gatling.http.request.ExtraInfo
 
 class HttpProtocolBuilderSpec extends FlatSpec with Matchers {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTestPure()
 
   "http protocol configuration builder" should "support an optional extra info extractor" in {
 
