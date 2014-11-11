@@ -18,6 +18,7 @@ package io.gatling.core.session.el
 import java.util.{ ArrayList => JArrayList, HashMap => JHashMap, LinkedList => JLinkedList }
 
 import io.gatling.core.config.GatlingConfiguration
+import io.gatling.core.json.Jackson
 import org.scalatest.{ FlatSpec, Matchers }
 
 import io.gatling.core.session.{ el, Session }
@@ -25,7 +26,8 @@ import io.gatling.core.test.ValidationValues
 
 class ELSpec extends FlatSpec with Matchers with ValidationValues {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTestPure()
+  Jackson.initialize
 
   "One monovalued Expression" should "return expected result when the variable is the whole string" in {
     val session = Session("scenario", "1", Map("bar" -> "BAR"))

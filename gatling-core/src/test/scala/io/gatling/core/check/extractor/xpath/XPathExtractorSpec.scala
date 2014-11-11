@@ -24,7 +24,9 @@ import org.xml.sax.InputSource
 
 class XPathExtractorSpec extends FlatSpec with Matchers with ValidationValues {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTest()
+  SaxonXPathExtractor.CompilerCache.initialize(_.core.extract.xpath.cacheMaxCapacity)
+  SaxonXPathExtractor.XPathExecutableCache.initialize(_.core.extract.xpath.cacheMaxCapacity)
 
   val namespaces = List("foo" -> "http://foo/foo")
 

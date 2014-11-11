@@ -22,7 +22,8 @@ import io.gatling.core.test.ValidationValues
 
 class RegexExtractorSpec extends FlatSpec with Matchers with ValidationValues {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTestPure()
+  RegexExtractor.PatternCache.initialize(_.core.extract.regex.cacheMaxCapacity)
 
   "count" should "return Some(0) when no results" in {
     val stringRegexExtractor = new CountRegexExtractor("""foo""")

@@ -3,6 +3,7 @@ package io.gatling.http.check.body
 import java.nio.charset.StandardCharsets._
 
 import io.gatling.core.check.CheckResult
+import io.gatling.core.check.extractor.regex.RegexExtractor
 import io.gatling.core.config.GatlingConfiguration
 import org.mockito.Mockito._
 import org.scalatest.{ Matchers, FlatSpec }
@@ -17,7 +18,9 @@ import scala.collection.mutable
 
 class HttpBodyRegexCheckSpec extends FlatSpec with Matchers with ValidationValues with MockitoSugar {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTestPure()
+
+  RegexExtractor.PatternCache.initialize(_.core.extract.regex.cacheMaxCapacity)
 
   implicit def cache = mutable.Map.empty[Any, Any]
 

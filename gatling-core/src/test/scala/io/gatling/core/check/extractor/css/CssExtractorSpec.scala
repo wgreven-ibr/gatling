@@ -26,7 +26,8 @@ import io.gatling.core.util.IO._
 
 class CssExtractorSpec extends FlatSpec with Matchers with ValidationValues {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTestPure()
+  CssExtractor.SelectorCache.initialize(_.core.extract.css.cacheMaxCapacity)
 
   def prepared(file: String): NodeSelector = withCloseable(getClass.getResourceAsStream(file)) { is =>
     val string = is.toString(UTF_8)

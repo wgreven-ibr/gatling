@@ -15,6 +15,7 @@
  */
 package io.gatling.core.check.extractor.jsonpath
 
+import io.gatling.core.json.Jackson
 import org.scalatest.{ FlatSpec, Matchers }
 
 import io.gatling.core.config.GatlingConfiguration
@@ -22,7 +23,9 @@ import io.gatling.core.test.ValidationValues
 
 class JsonPathExtractorSpec extends FlatSpec with Matchers with ValidationValues {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTestPure()
+  Jackson.initialize
+  JsonPathExtractor.JsonPathCache.initialize(_.core.extract.jsonPath.cacheMaxCapacity)
 
   def testCount(path: String, sample: JsonSample, expected: Int): Unit = {
     new CountJsonPathExtractor(path)(sample.boonAST).succeeded shouldBe Some(expected)

@@ -15,13 +15,15 @@
  */
 package io.gatling.core.feeder
 
+import io.gatling.core.json.Jackson
 import org.scalatest.{ FlatSpec, Matchers }
 
 import io.gatling.core.config.GatlingConfiguration
 
 class FeederSupportSpec extends FlatSpec with Matchers with FeederSupport {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTest()
+  Jackson.initialize
 
   "tsv" should "handle file without escape char" in {
     val data = tsv("sample1.tsv").build.toArray

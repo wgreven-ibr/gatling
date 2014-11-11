@@ -20,6 +20,7 @@ import scala.collection.mutable
 import org.scalatest.{ FlatSpec, Matchers }
 
 import io.gatling.core.config.GatlingConfiguration
+import io.gatling.core.check.extractor.xpath.SaxonXPathExtractor
 import io.gatling.core.validation._
 import io.gatling.core.session.Session
 import io.gatling.core.test.ValidationValues
@@ -29,7 +30,9 @@ import io.gatling.jms.{ MockMessage, JmsCheck }
 
 class JmsXPathCheckSpec extends FlatSpec with Matchers with ValidationValues with MockMessage {
 
-  GatlingConfiguration.setUpForTest()
+  implicit val config = GatlingConfiguration.setUpForTestPure()
+  SaxonXPathExtractor.CompilerCache.initialize(_.core.extract.xpath.cacheMaxCapacity)
+  SaxonXPathExtractor.XPathExecutableCache.initialize(_.core.extract.xpath.cacheMaxCapacity)
 
   implicit def cache = mutable.Map.empty[Any, Any]
 
